@@ -1,0 +1,41 @@
+name: Gündem Botu
+
+on:
+  schedule:
+    # Her 10 dakikada bir çalışır (GitHub, yoğunluğa göre birkaç dk gecikebilir)
+    - cron: "*/10 * * * *"
+  # Actions sekmesinden elle "Run workflow" ile de tetikleyebilirsin
+  workflow_dispatch:
+
+# Botun state.json dosyasını repoya geri yazabilmesi için gerekli izin
+permissions:
+  contents: write
+
+jobs:
+  calistir:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repoyu çek
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Bağımlılıkları yükle
+        run: pip install -r requirements.txt
+
+      - name: Botu çalıştır
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python main.py
+
+      - name: state.json değiştiyse commit'le
+        run: |
+          git config --global user.name "gundem-bot"
+          git config --global user.email "gundem-bot@users.noreply.github.com"
+          git add state.json
+          git diff --staged --quiet || git commit -m "state güncellendi"
+          git push
