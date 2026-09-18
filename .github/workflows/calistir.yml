@@ -2,7 +2,7 @@ name: Gündem Botu
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "*/4 * * * *"
   workflow_dispatch:
 
 permissions:
